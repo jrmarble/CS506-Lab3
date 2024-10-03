@@ -3,12 +3,27 @@ from PIL import Image
 
 # Function to load and preprocess the image
 def load_image(image_path):
-    raise NotImplementedError('You need to implement this function')
+    # Load the image using Pillow and convert it to a NumPy array
+    image = Image.open(image_path)
+    # Convert the image to RGB if it's not already
+    image = image.convert('RGB')
+    image_np = np.array(image)
+    return image_np
 
 # Function to perform SVD on a single channel of the image matrix
 def compress_channel_svd(channel_matrix, rank):
-    raise NotImplementedError('You need to implement this function')
-
+    # Apply Singular Value Decomposition (SVD)
+    U, S, Vt = np.linalg.svd(channel_matrix, full_matrices=False)
+    
+    # Keep only the top 'rank' singular values and corresponding vectors
+    S_reduced = np.diag(S[:rank])
+    U_reduced = U[:, :rank]
+    Vt_reduced = Vt[:rank, :]
+    
+    # Reconstruct the channel using the reduced SVD components
+    compressed_channel = np.dot(U_reduced, np.dot(S_reduced, Vt_reduced))
+    
+    return compressed_channel
 # Function to perform SVD for image compression
 def image_compression_svd(image_np, rank):
     # Check if the image is grayscale or color image
@@ -53,7 +68,7 @@ def save_result(original_image_np, quantized_image_np, output_path):
     
 if __name__ == '__main__':
     # Load and process the image
-    image_path = 'favorite_image.png'  
+    image_path = 'examples/example.jpg'  
     output_path = 'compressed_image.png'  
     image_np = load_image(image_path)
 
